@@ -1,0 +1,62 @@
+dataset_config:
+  twitter:
+    data_dir: ${env.data_dir}
+    depth_first: false
+    fast_read: false
+    use_images: true
+    use_features: false
+    images:
+      train:
+      - datasets/twitter/defaults/images/twitter/dataset/
+      val:
+      - datasets/twitter/defaults/images/twitter/dataset/
+      test:
+      - datasets/twitter/defaults/images/twitter/dataset/
+    features:
+      train:
+      - datasets/twitter/defaults/features/features.lmdb
+      val:
+      - datasets/twitter/defaults/features/features.lmdb
+      test:
+      - datasets/twitter/defaults/features/features.lmdb
+    annotations:
+      train:
+      - datasets/twitter/defaults/annotations/train.jsonl
+      val:
+      - datasets/twitter/defaults/annotations/dev.jsonl
+      test:
+      - datasets/twitter/defaults/annotations/test.jsonl
+    max_features: 20
+    processors:
+      text_processor:
+        type: vocab
+        params:
+          max_length: 70
+          vocab:
+            type: intersected
+            embedding_name: glove.6B.300d
+            vocab_file: datasets/twitter/defaults/extras/vocab_twitter.txt
+          preprocessor:
+            type: simple_sentence
+            params: {}
+      bbox_processor:
+        type: bbox
+        params:
+          max_length: 50
+      image_processor:
+        type: torchvision_transforms
+        params:
+          transforms:
+            - type: Resize
+              params:
+                size: [73, 73]
+            - type: CenterCrop
+              params:
+                size: [73, 73]
+            - ToTensor
+            - GrayScaleTo3Channels
+            - type: Normalize
+              params:
+                mean: [0.46777044, 0.44531429, 0.40661017]
+                std: [0.12221994, 0.12145835, 0.14380469]
+    return_features_info: false

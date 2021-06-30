@@ -1,0 +1,72 @@
+dataset_config:
+  food101:
+    data_dir: ${env.data_dir}
+    depth_first: false
+    fast_read: false
+    use_images: true
+    use_features: false
+    images:
+      train:
+      - datasets/food101/defaults/images/food101/dataset/
+      val:
+      - datasets/food101/defaults/images/food101/dataset/
+      test:
+      - datasets/food101/defaults/images/food101/dataset/
+    features:
+      train:
+      - datasets/food101/defaults/features/features.lmdb
+      val:
+      - datasets/food101/defaults/features/features.lmdb
+      test:
+      - datasets/food101/defaults/features/features.lmdb
+    annotations:
+      train:
+      - datasets/food101/defaults/annotations/train.jsonl
+      val:
+      - datasets/food101/defaults/annotations/dev.jsonl
+      test:
+      - datasets/food101/defaults/annotations/test.jsonl
+    max_features: 20
+    processors:
+      text_processor:
+        type: vocab
+        params:
+          max_length: 70
+          vocab:
+            type: intersected
+            embedding_name: glove.6B.300d
+            vocab_file: datasets/food101/defaults/extras/vocab_food101.txt
+          preprocessor:
+            type: simple_sentence
+            params: {}
+      bbox_processor:
+        type: bbox
+        params:
+          max_length: 50
+      answer_processor:
+        type: multi_hot_answer_from_vocab
+        params:
+            num_answers: 1
+            vocab_file: datasets/food101/defaults/extras/classes_food101.txt
+            preprocessor:
+                type: simple_word
+                params: {}
+      image_processor:
+        type: torchvision_transforms
+        params:
+          transforms:
+            - type: Resize
+              params:
+                #size: [256, 256]
+                size: [48, 48]
+            - type: CenterCrop
+              params:
+                #size: [224, 224]
+                size: [32, 32]
+            - ToTensor
+            - GrayScaleTo3Channels
+            - type: Normalize
+              params:
+                mean: [0.46777044, 0.44531429, 0.40661017]
+                std: [0.12221994, 0.12145835, 0.14380469]
+    return_features_info: false

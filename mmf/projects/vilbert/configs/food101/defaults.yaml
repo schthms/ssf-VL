@@ -1,0 +1,67 @@
+includes:
+- configs/datasets/food101/with_features.yaml
+
+model_config:
+  vilbert:
+    hidden_size: 768
+    hidden_dropout_prob: 0.1
+    training_head_type: classification
+    num_labels: 102
+    losses:
+    - type: cross_entropy
+
+dataset_config:
+  food101:
+    return_features_info: true
+    processors:
+      text_processor:
+        type: bert_tokenizer
+        params:
+          tokenizer_config:
+            type: bert-base-uncased
+            params:
+              do_lower_case: true
+          mask_probability: 0
+          max_seq_length: 256
+      transformer_bbox_processor:
+        type: transformer_bbox
+        params:
+          bbox_key: bbox
+          image_width_key: image_width
+          image_height_key: image_height
+
+optimizer:
+  type: adam_w
+  params:
+    lr: 5e-5
+    eps: 1e-8
+
+scheduler:
+  type: warmup_linear
+  params:
+    num_warmup_steps: 2000
+    num_training_steps: 88000
+
+evaluation:
+  metrics:
+  - accuracy
+  - macro_f1
+  - micro_f1
+
+training:
+  # added gradient clipping
+  clip_norm_mode: all
+  clip_gradients: false
+  # required for clipping
+  max_grad_l2_norm: 0.0
+  batch_size: 480
+  lr_scheduler: true
+  # Don't forget to update schedule_attributes if you update this
+  max_updates: 60000
+  early_stop:
+    criteria: food101/micro_f1
+    minimize: false
+
+checkpoint:
+  pretrained_state_mapping:
+    model.bert: model.bert
